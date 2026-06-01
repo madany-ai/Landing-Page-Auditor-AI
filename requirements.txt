@@ -1,0 +1,39 @@
+# Web scraping
+scrapling[fetchers]
+
+# LLM client stack
+litellm
+instructor
+
+# Data validation
+pydantic
+pydantic-settings
+
+# Configuration
+python-dotenv
+
+# CLI & console
+rich
+typer[all]
+
+# Logging
+loguru
+
+# Fast JSON
+orjson
+
+# Markdown parsing
+markdown-it-py
+
+# Report templating
+jinja2
+
+# GUI Arabic Support
+python-bidi
+arabic-reshaper
+
+# Retry logic
+tenacity
+
+# Testing
+pytest
