@@ -52,6 +52,7 @@ def run_audit_pipeline(
     url: str,
     model: Optional[str] = None,
     progress_cb: Optional[ProgressCallback] = None,
+    skip_reports: bool = False,
 ) -> dict:
     """
     Execute the complete landing-page audit pipeline.
@@ -67,12 +68,13 @@ def run_audit_pipeline(
         url:         Landing page URL to audit.
         model:       Optional LLM model override.
         progress_cb: Optional callback(msg, step, total) for live progress.
+        skip_reports: If True, do not generate the standalone PDF/HTML/MD reports.
 
     Returns:
         dict with keys: raw_page, content, result, overall_score,
                         md_path, html_path, output_dir
     """
-    total = 5
+    total = 5 if not skip_reports else 4
 
     def notify(msg: str, step: int) -> None:
         logger.info(f"[{step}/{total}] {msg}")
@@ -97,13 +99,17 @@ def run_audit_pipeline(
     result.overall_score = overall_score
 
     # ── Step 5 ────────────────────────────────────────────────────────────────
-    notify("Generating reports…", 5)
+    md_path, html_path, pdf_path = None, None, None
     output_dir = get_output_dir(url)
-    md_path = generate_markdown_report(result, url, output_dir)
-    html_path = generate_html_report(result, url, output_dir)
-    pdf_path = generate_pdf_report(md_path)
 
-    logger.success(f"Audit complete — score: {overall_score}/100 → {output_dir}")
+    if not skip_reports:
+        notify("Generating reports…", 5)
+        md_path = generate_markdown_report(result, url, output_dir)
+        html_path = generate_html_report(result, url, output_dir)
+        pdf_path = generate_pdf_report(md_path)
+        logger.success(f"Audit complete — score: {overall_score}/100 → {output_dir}")
+    else:
+        logger.success(f"Audit analysis complete — score: {overall_score}/100")
 
     return {
         "raw_page": raw_page,

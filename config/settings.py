@@ -18,6 +18,7 @@ class Settings(BaseSettings):
         default="https://openrouter.ai/api/v1", alias="OPENROUTER_BASE_URL"
     )
     model: str = Field(default="deepseek/deepseek-chat", alias="MODEL")
+    fallback_model: str = Field(default="openrouter/google/gemini-2.5-flash", alias="FALLBACK_MODEL")
 
     # LLM generation
     temperature: float = Field(default=0.2, alias="TEMPERATURE")

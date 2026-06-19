@@ -41,6 +41,7 @@ def generate_html_report(
     result: AuditResult,
     url: str,
     output_dir: Path,
+    comparison_result = None,
 ) -> Path:
     """Render the HTML report and write it to *output_dir/report.html*."""
     env = Environment(loader=FileSystemLoader(str(_TEMPLATE_DIR)), autoescape=True)
@@ -64,6 +65,7 @@ def generate_html_report(
         "score_dash": score_dash,
         "arc_length": arc_length,
         "category_color": _category_color,
+        "comparison": comparison_result,
     }
 
     rendered = template.render(**context)

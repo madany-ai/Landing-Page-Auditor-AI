@@ -32,6 +32,7 @@ def generate_markdown_report(
     result: AuditResult,
     url: str,
     output_dir: Path,
+    comparison_result = None,
 ) -> Path:
     """Render the Markdown report and write it to *output_dir/report.md*."""
     env = Environment(loader=FileSystemLoader(str(_TEMPLATE_DIR)), autoescape=False)
@@ -42,6 +43,7 @@ def generate_markdown_report(
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "result": result,
         "categories": _build_categories(result),
+        "comparison": comparison_result,
     }
 
     rendered = template.render(**context)

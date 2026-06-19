@@ -41,10 +41,12 @@ def _before_sleep(retry_state: RetryCallState) -> None:
 def _call_llm(messages: list[dict], model: str) -> AuditResult:
     """Make one instructor-validated LLM call and return an AuditResult."""
     client = get_client()
-    return client.chat.completions.create(
-        model=model,
+    from llm.client import safe_llm_call
+    return safe_llm_call(
+        client=client,
         messages=messages,
         response_model=AuditResult,
+        model=model,
         temperature=settings.temperature,
         max_tokens=settings.max_tokens,
     )

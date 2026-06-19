@@ -28,12 +28,17 @@ markdown-it-py
 # Report templating
 jinja2
 
-# GUI Arabic Support
-python-bidi
-arabic-reshaper
+# PDF generation
+markdown-pdf
 
 # Retry logic
 tenacity
+
+# Web UI
+gradio
+
+# Competitor search
+duckduckgo_search
 
 # Testing
 pytest

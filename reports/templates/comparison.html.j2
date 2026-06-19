@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Competitive Analysis — {{ target.domain }}</title>
+  <style>
+    /* ── Reset & Root ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #0a0b0f;
+      --surface:     #13151d;
+      --surface-2:   #1a1d2e;
+      --border:      #1e2235;
+      --accent:      #7c3aed;
+      --accent-2:    #8b5cf6;
+      --success:     #10b981;
+      --warning:     #f59e0b;
+      --error:       #ef4444;
+      --text:        #e2e8f0;
+      --text-dim:    #94a3b8;
+      --text-muted:  #475569;
+      --radius:      16px;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(160deg, #0d0f1a 0%, #13151d 60%, #0d1020 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 56px 24px 48px;
+      text-align: center;
+    }
+    .header-logo {
+      font-size: 13px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent-2);
+      margin-bottom: 20px; display: block;
+    }
+    header h1 {
+      font-size: clamp(28px, 5vw, 44px); font-weight: 800;
+      background: linear-gradient(135deg, #e2e8f0 30%, var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    /* ── Exec Summary ───────────────────────────────────────────────────── */
+    .exec-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px; margin: 40px 0;
+      font-size: 16px; line-height: 1.8;
+      text-align: center;
+    }
+
+    /* ── Compare Grid ───────────────────────────────────────────────────── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; margin-bottom: 40px;
+    }
+    .comp-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px; position: relative;
+    }
+    .comp-card.target {
+      border: 2px solid var(--accent);
+      background: linear-gradient(180deg, rgba(124,58,237,0.05) 0%, transparent 100%);
+    }
+    .comp-domain { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .comp-url { font-size: 12px; color: var(--text-dim); margin-bottom: 20px; word-break: break-all; }
+    
+    .score-badge {
+      font-size: 32px; font-weight: 900; line-height: 1;
+      margin-bottom: 24px;
+    }
+    .score-good { color: var(--success); }
+    .score-warn { color: var(--warning); }
+    .score-bad  { color: var(--error); }
+
+    .cat-scores {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 8px 16px; font-size: 13px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .cat-name { color: var(--text-dim); }
+    .cat-val { font-weight: 600; text-align: left; }
+
+    /* ── Insights ───────────────────────────────────────────────────────── */
+    .insights-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 768px) { .insights-grid { grid-template-columns: 1fr; } }
+    
+    .insight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+    .card-title {
+      font-size: 18px; font-weight: 700; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .list-item {
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item::before { margin-right: 10px; }
+    .adv-list .list-item::before { content: '✅'; }
+    .gap-list .list-item::before { content: '⚠️'; }
+    .rec-list .list-item::before { content: '💡'; }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="header-logo">🚀 Landing Page Auditor AI</span>
+  <h1>Strategic Competitive Analysis</h1>
+  <p style="color:var(--text-dim)">Target: {{ target.domain }} vs. {{ competitors|length }} Competitors</p>
+</header>
+
+<div class="container">
+
+  <div class="exec-summary">
+    <strong>Executive Summary</strong><br>
+    <p style="margin-top:10px; color:var(--text-dim)">{{ insights.executive_comparison }}</p>
+  </div>
+
+  <h2 style="margin-bottom:20px;">📊 Score Comparison</h2>
+  <div class="compare-grid">
+    
+    <!-- Target -->
+    <div class="comp-card target">
+      <div style="font-size:12px; font-weight:700; color:var(--accent); margin-bottom:8px;">🎯 YOUR PAGE</div>
+      <div class="comp-domain">{{ target.domain }}</div>
+      <div class="comp-url"><a href="{{ target.url }}">{{ target.url }}</a></div>
+      <div class="score-badge {% if target.overall_score >= 70 %}score-good{% elif target.overall_score >= 50 %}score-warn{% else %}score-bad{% endif %}">
+        {{ target.overall_score }}/100
+      </div>
+      
+      <div class="cat-scores">
+        <div class="cat-name">Clarity</div><div class="cat-val">{{ target.clarity_score }}</div>
+        <div class="cat-name">Value Prop</div><div class="cat-val">{{ target.value_proposition_score }}</div>
+        <div class="cat-name">Offer</div><div class="cat-val">{{ target.offer_score }}</div>
+        <div class="cat-name">Trust</div><div class="cat-val">{{ target.trust_score }}</div>
+        <div class="cat-name">CTA</div><div class="cat-val">{{ target.cta_score }}</div>
+        <div class="cat-name">ICP</div><div class="cat-val">{{ target.icp_score }}</div>
+        <div class="cat-name">Objections</div><div class="cat-val">{{ target.objections_score }}</div>
+        <div class="cat-name">Friction</div><div class="cat-val">{{ target.friction_score }}</div>
+      </div>
+    </div>
+
+    <!-- Competitors -->
+    {% for comp in competitors %}
+    <div class="comp-card">
+      <div style="font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">⚔️ COMPETITOR {{ loop.index }}</div>
+      <div class="comp-domain">{{ comp.domain }}</div>
+      <div class="comp-url"><a href="{{ comp.url }}">{{ comp.url }}</a></div>
+      
+      {% if comp.overall_score > 0 %}
+      <div class="score-badge {% if comp.overall_score >= 70 %}score-good{% elif comp.overall_score >= 50 %}score-warn{% else %}score-bad{% endif %}">
+        {{ comp.overall_score }}/100
+      </div>
+      
+      <div class="cat-scores">
+        <div class="cat-name">Clarity</div><div class="cat-val">{{ comp.clarity_score }}</div>
+        <div class="cat-name">Value Prop</div><div class="cat-val">{{ comp.value_proposition_score }}</div>
+        <div class="cat-name">Offer</div><div class="cat-val">{{ comp.offer_score }}</div>
+        <div class="cat-name">Trust</div><div class="cat-val">{{ comp.trust_score }}</div>
+        <div class="cat-name">CTA</div><div class="cat-val">{{ comp.cta_score }}</div>
+        <div class="cat-name">ICP</div><div class="cat-val">{{ comp.icp_score }}</div>
+        <div class="cat-name">Objections</div><div class="cat-val">{{ comp.objections_score }}</div>
+        <div class="cat-name">Friction</div><div class="cat-val">{{ comp.friction_score }}</div>
+      </div>
+      {% else %}
+      <div class="score-badge score-bad">Failed</div>
+      <p style="color:var(--text-dim); font-size:13px; text-align:center;">Could not audit</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+  </div>
+
+  </div>
+
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="card-title">💪 Your Competitive Advantages</div>
+      <div class="adv-list">
+        {% for adv in insights.competitive_advantages %}
+        <div class="list-item">{{ adv }}</div>
+        {% else %}
+        <div class="list-item" style="color:var(--text-muted)">None identified.</div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <div class="insight-card">
+      <div class="card-title">🔻 Missing Elements</div>
+      <div class="gap-list">
+        {% for me in insights.missing_elements %}
+        <div class="list-item">{{ me }}</div>
+        {% else %}
+        <div class="list-item" style="color:var(--text-muted)">None identified.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if insights.quick_wins %}
+  <div class="insight-card" style="margin-bottom:40px;">
+    <div class="card-title">⚡ Quick Wins</div>
+    <div class="rec-list">
+      {% for win in insights.quick_wins %}
+      <div class="list-item">{{ win }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="insight-card" style="margin-bottom:40px;">
+    <div class="card-title">💡 Strategic Business Insights</div>
+    <div style="display:flex; flex-direction:column; gap:24px;">
+      {% for ins in insights.deep_insights %}
+      <div style="background:var(--surface-2); padding:20px; border-radius:8px; border:1px solid var(--border);">
+        <h4 style="margin-bottom:12px; font-size:16px;">{{ ins.observation }}</h4>
+        <p style="font-size:14px; margin-bottom:8px;"><strong style="color:var(--text-dim)">Evidence:</strong> {{ ins.evidence }}</p>
+        <p style="font-size:14px; margin-bottom:8px;"><strong style="color:var(--warning)">Impact:</strong> {{ ins.impact }}</p>
+        <p style="font-size:14px;"><strong style="color:var(--success)">Recommendation:</strong> {{ ins.recommendation }}</p>
+      </div>
+      {% else %}
+      <div class="list-item" style="color:var(--text-muted)">No deep insights generated.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="insight-card" style="margin-bottom:40px;">
+    <div class="card-title">🚀 Prioritized Action Plan</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="padding:12px 8px;">Priority</th>
+            <th style="padding:12px 8px;">Action</th>
+            <th style="padding:12px 8px;">Impact</th>
+            <th style="padding:12px 8px;">Effort</th>
+            <th style="padding:12px 8px;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for action in insights.action_plan|sort(attribute='priority') %}
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:16px 8px;"><strong>#{{ action.priority }}</strong></td>
+            <td style="padding:16px 8px; font-weight:600; color:var(--text);">{{ action.title }}</td>
+            <td style="padding:16px 8px;">
+                <span style="background:rgba(16,185,129,0.1); color:var(--success); padding:4px 8px; border-radius:4px; font-size:12px;">{{ action.expected_impact }}</span>
+            </td>
+            <td style="padding:16px 8px;">
+                <span style="background:rgba(245,158,11,0.1); color:var(--warning); padding:4px 8px; border-radius:4px; font-size:12px;">{{ action.effort }}</span>
+            </td>
+            <td style="padding:16px 8px; color:var(--text-dim);">{{ action.description }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" style="padding:16px 8px; color:var(--text-muted);">No actions planned.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

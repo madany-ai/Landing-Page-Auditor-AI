@@ -41,3 +41,38 @@ def get_model_name(model: str | None = None) -> str:
     if not m.startswith("openrouter/"):
         return f"openrouter/{m}"
     return m
+
+def safe_llm_call(client, messages: list[dict], response_model, model: str | None = None, **kwargs):
+    """
+    Executes a structured LLM call, automatically falling back if the primary model fails.
+    """
+    primary_model = get_model_name(model)
+    fallback_model = get_model_name(settings.fallback_model)
+    
+    try:
+        return client.chat.completions.create(
+            model=primary_model,
+            messages=messages,
+            response_model=response_model,
+            **kwargs
+        )
+    except Exception as exc:
+        err_str = str(exc)
+        if "free-models-per-day" in err_str or "Rate limit exceeded" in err_str:
+            clean_err = "OpenRouter free-tier rate limit exceeded"
+        elif "<failed_attempts>" in err_str:
+            clean_err = "LLM API Error (Multiple retries failed)"
+        else:
+            clean_err = err_str.split("\n")[0][:100]
+            
+        logger.warning(f"Primary model {primary_model} failed ({clean_err}). Falling back to {fallback_model}...")
+        try:
+            return client.chat.completions.create(
+                model=fallback_model,
+                messages=messages,
+                response_model=response_model,
+                **kwargs
+            )
+        except Exception as fallback_exc:
+            logger.error(f"Fallback model {fallback_model} also failed: {fallback_exc}")
+            raise

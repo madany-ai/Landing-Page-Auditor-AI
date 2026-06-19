@@ -406,6 +406,160 @@
     {% if not ns3.found %}<p style="color:var(--text-muted);font-size:13px;">No low-priority issues.</p>{% endif %}
   </div>
 
+  {% if comparison %}
+  <!-- ════════════ COMPETITOR DISCOVERY INTELLIGENCE ════════════ -->
+  <div class="section-heading">🤖 Competitor Discovery Intelligence</div>
+  <div class="card" style="margin-bottom:40px;">
+    <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+      <div>
+        <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Discovery Quality Score</div>
+        <div style="font-size: 24px; font-weight: 800; color: var(--accent-1);">{{ comparison.discovery_metrics.quality_score }} / 100</div>
+      </div>
+      <div>
+        <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Total Evaluated</div>
+        <div style="font-size: 24px; font-weight: 800; color: var(--text);">{{ comparison.discovery_metrics.total_evaluated }}</div>
+      </div>
+    </div>
+    
+    <div class="cat-section-title">✅ Valid Competitors Identified</div>
+    <div style="overflow-x: auto; margin-bottom: 24px;">
+      <table style="width:100%; border-collapse:collapse; text-align:left; font-size: 13px;">
+        <thead>
+          <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+            <th style="padding:12px;">Domain</th>
+            <th style="padding:12px;">Confidence</th>
+            <th style="padding:12px;">Reason Selected</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comp in comparison.competitors %}
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;"><a href="{{ comp.url }}" target="_blank" style="color:var(--accent-2);">{{ comp.domain }}</a></td>
+            <td style="padding:12px; font-weight: 600;">{{ comp.confidence }}%</td>
+            <td style="padding:12px; color:var(--text-muted);">{{ comp.selection_reason }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cat-section-title">❌ Rejected Candidates Log</div>
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse:collapse; text-align:left; font-size: 13px;">
+        <thead>
+          <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+            <th style="padding:12px;">Domain</th>
+            <th style="padding:12px;">Confidence</th>
+            <th style="padding:12px;">Rejection Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rej in comparison.rejected_candidates %}
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px; color:var(--text-dim);">{{ rej.domain }}</td>
+            <td style="padding:12px; font-weight: 600; color:var(--accent-1);">{{ rej.confidence }}%</td>
+            <td style="padding:12px; color:var(--text-muted);">{{ rej.reason }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" style="padding: 12px; color: var(--text-muted);">No candidates were rejected.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════ COMPETITOR BENCHMARK ════════════ -->
+  <div class="section-heading">⚔️ Competitor Benchmark</div>
+  <div class="card" style="padding:0; overflow:auto;">
+    <table style="width:100%; border-collapse:collapse; text-align:left;">
+      <thead>
+        <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+          <th style="padding:16px;">Category</th>
+          <th style="padding:16px;">Your Score</th>
+          <th style="padding:16px;">Competitor Avg</th>
+          <th style="padding:16px;">Gap</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set rows = [
+            ("Clarity", comparison.benchmarks.clarity),
+            ("Value Prop", comparison.benchmarks.value_proposition),
+            ("Offer", comparison.benchmarks.offer),
+            ("Trust", comparison.benchmarks.trust),
+            ("CTA", comparison.benchmarks.cta),
+            ("ICP", comparison.benchmarks.icp),
+            ("Objections", comparison.benchmarks.objections),
+            ("Friction", comparison.benchmarks.friction),
+        ] %}
+        {% for name, b in rows %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:16px; font-weight:600;">{{ name }}</td>
+          <td style="padding:16px;">{{ b.target_score }}</td>
+          <td style="padding:16px; color:var(--text-muted);">{{ b.competitor_average }}</td>
+          <td style="padding:16px; color: {% if b.gap >= 0 %}var(--accent-2){% else %}var(--accent-1){% endif %}; font-weight:700;">
+            {% if b.gap >= 0 %}+{% endif %}{{ b.gap }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-heading">💡 Competitive Intelligence</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:40px;">
+    <div class="card weaknesses-card">
+      <div class="card-title">🔻 Missing Elements</div>
+      {% for me in comparison.insights.missing_elements %}
+      <div class="sw-item">{{ me }}</div>
+      {% endfor %}
+    </div>
+    <div class="card strengths-card">
+      <div class="card-title">💪 Your Advantages</div>
+      {% for adv in comparison.insights.competitive_advantages %}
+      <div class="sw-item">{{ adv }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section-heading">🚀 Strategic Insights</div>
+  {% for ins in comparison.insights.deep_insights %}
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-top:0; color:var(--text); font-size:16px; margin-bottom:12px;">{{ ins.observation }}</h3>
+    <div class="finding-item" style="border:none; padding:4px 0;"><strong>Evidence:</strong> {{ ins.evidence }}</div>
+    <div class="finding-item" style="border:none; padding:4px 0;"><strong style="color:var(--accent-2);">Business Impact:</strong> {{ ins.impact }}</div>
+    <div class="rec-item" style="border:none; margin-top:8px;"><strong>Recommendation:</strong> {{ ins.recommendation }}</div>
+  </div>
+  {% endfor %}
+
+  <div class="section-heading">🎯 Prioritized Action Plan</div>
+  <div class="card" style="padding:0; overflow:auto;">
+    <table style="width:100%; border-collapse:collapse; text-align:left;">
+      <thead>
+        <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+          <th style="padding:16px; width:80px;">Priority</th>
+          <th style="padding:16px;">Action</th>
+          <th style="padding:16px; width:120px;">Impact</th>
+          <th style="padding:16px; width:120px;">Effort</th>
+          <th style="padding:16px;">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for action in comparison.insights.action_plan|sort(attribute='priority') %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:16px; font-weight:700; text-align:center;">
+            <span style="background:var(--surface); padding:6px 12px; border-radius:12px; border:1px solid var(--border);">{{ action.priority }}</span>
+          </td>
+          <td style="padding:16px; font-weight:600;">{{ action.title }}</td>
+          <td style="padding:16px; color:var(--text-muted);">{{ action.expected_impact }}</td>
+          <td style="padding:16px; color:var(--text-muted);">{{ action.effort }}</td>
+          <td style="padding:16px; font-size:13px; line-height:1.5; color:var(--text-dim);">{{ action.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
 </div><!-- /.container -->
 
 <footer>
